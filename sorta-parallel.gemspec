@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Mihail Odebe"]
   spec.email         = ["derpiranha@gmail.com"]
 
-  spec.summary       = %q{Write a short summary, because RubyGems requires one.}
+  spec.summary       = %q{Sort of Parallel gem analog but with power of Ruby 3.0 ractors}
   # spec.description   = %q{TODO: Write a longer description or delete this line.}
   spec.homepage      = "https://github.com/Odebe/sorta-parallel"
   spec.license       = "MIT"
