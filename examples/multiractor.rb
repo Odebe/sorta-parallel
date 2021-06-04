@@ -7,20 +7,32 @@ class IncrTask
 end
 
 r1 = Ractor.new(name: '1') do
-  source = [1,2,3]
-  Sorta::Parallel.map(source, IncrTask)
+  5.times.map do |i|
+    Thread.new do
+      source = (i..10).to_a
+      result = Sorta::Parallel.map(source, IncrTask)
+
+      puts "ractor: #{Ractor.current.name}, thread: #{i}  source: #{source.inspect}, result: #{result.inspect}"
+    end
+  end.each(&:join)
 end
 
 r2 = Ractor.new(name: '2') do
-  source = [9,10,11]
-  Sorta::Parallel.map(source, IncrTask)
+  5.times.map do |i|
+    Thread.new do
+      source = ((100+i)..(100+10)).to_a
+      result = Sorta::Parallel.map(source, IncrTask)
+
+      puts "ractor: #{Ractor.current.name} thread: #{i} source: #{source.inspect}, result: #{result.inspect}"
+    end
+  end.each(&:join)
 end
 
 workers = [r1, r2]
+loop do
+  break if workers.empty?
 
-while workers.any?
-  ractor, msg = Ractor.select(*workers)
-  puts "ractor ##{ractor.name}, result: #{msg.inspect}"
+  ractor, _ = Ractor.select(*workers)
   workers.delete(ractor)
 end
 

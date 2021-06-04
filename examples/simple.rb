@@ -6,9 +6,7 @@ class IncrTask
   end
 end
 
-source = [1,2,3]
+source = (1..10).to_a
 result = Sorta::Parallel.map(source, IncrTask)
 
 puts "source: #{source.inspect}, result: #{result.inspect}"
-
-

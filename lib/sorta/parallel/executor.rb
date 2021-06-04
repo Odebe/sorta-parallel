@@ -2,12 +2,12 @@ module Sorta
   module Parallel
     class Executor
       def initialize(source, task_klass)
-        # Reactor.update_current_ractor!
+        Reactor.start!
 
         @source = source.dup
         @task_klass = task_klass
         @results = []
-        @result_pipe = Ractor.new { loop { Ractor.yield(Ractor.receive) } }
+        @response_queue = Queue.new
       end
 
       def each!
@@ -17,19 +17,17 @@ module Sorta
 
       def map!
         @source.each_with_index do |item, i|
-          pipe.send([@task_klass, @result_pipe, item, i])
+          Reactor.register([@task_klass, @response_queue, item, i])
         end
 
-        results = @source.size.times.map { @result_pipe.take }
-        raise 'oh no no no' if results.include?(Signals::Error)
+        @source.size.times do
+          @results << @response_queue.pop
+        end
+
+        raise 'oh no no no' if @results.include?(Signals::Error)
 
         # sort by index
-        results.sort_by(&:last).transpose.first
-      end
-
-      def pipe
-        # Ractor.current[:sorta_parallel_pipe]
-        Reactor::PIPE
+        @results.sort_by(&:last).transpose.first
       end
     end
   end

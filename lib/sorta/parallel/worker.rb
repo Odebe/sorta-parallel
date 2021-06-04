@@ -4,10 +4,8 @@ module Sorta
       def self.new(pipe)
         super(pipe) do |pipe|
           loop do
-            task, result_pipe, data, index = pipe.take
-            break if task.is_a?(Tasks::Quit)
-
-            result_pipe.send([task.new.call(data), index], move: true)
+            (task, queue_id, data, index), result_pipe = pipe.take
+            result_pipe.send([task.new.call(data), queue_id, index], move: true)
           rescue
             result_pipe.send(Signals::Error.new, move: true)
             next
